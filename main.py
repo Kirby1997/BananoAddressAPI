@@ -2,9 +2,11 @@
 
 import flask
 from flask import request, jsonify
+from flask_cors import CORS
 import sqlite3
 
 app = flask.Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config["DEBUG"] = True
 
 def dict_factory(cursor, row):
