@@ -88,4 +88,6 @@ def api_filter():
 
     return jsonify(results)
 
-app.run()
+
+if __name__ == '__main__':
+    app.run()
