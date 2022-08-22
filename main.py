@@ -1,5 +1,6 @@
 # Base code initially from https://programminghistorian.org/en/lessons/creating-apis-with-python-and-flask
 
+import os
 import flask
 from flask import request, jsonify
 from flask_cors import CORS
@@ -67,7 +68,7 @@ def api_filter():
 
     query = query[:-4] + ';'
 
-    conn = sqlite3.connect('addresses.sqlite')
+    conn = sqlite3.connect(os.getcwd() + "/addresses.sqlite")
     conn.row_factory = dict_factory
     cur = conn.cursor()
 
