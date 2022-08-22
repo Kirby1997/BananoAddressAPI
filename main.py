@@ -20,7 +20,19 @@ def dict_factory(cursor, row):
 @app.route('/', methods=['GET'])
 def home():
     return '''<h1>Banano address API</h1>
-<p>Banano address API by Kirby. Work in progress</p>'''
+<p>Banano address API by Kirby. Work in progress</p>
+<a href="/api/v1/resources/addresses?address=ban_31dhbgirwzd3ce7naor6o94woefws9hpxu4q8uxm1bz98w89zqpfks5rk3ad">/api/v1/resources/addresses?address=ban_31dhbgirwzd3ce7naor6o94woefws9hpxu4q8uxm1bz98w89zqpfks5rk3ad</a>
+<br>
+<a href="/api/v1/resources/addresses?type=Distribution">/api/v1/resources/addresses?type=Distribution</a>
+<br>
+<a href="/api/v1/resources/addresses?type=Exchange">/api/v1/resources/addresses?type=Exchange</a>
+<br>
+<a href="/api/v1/resources/addresses?type=Gambling">/api/v1/resources/addresses?type=Gambling</a>
+<br>
+<a href="/api/v1/resources/addresses/all">/api/v1/resources/addresses/all</a>
+<br>
+<a href="/api/v1/resources/addresses?illicit=1">/api/v1/resources/addresses?illicit=1</a>
+'''
 
 
 @app.route('/api/v1/resources/addresses/all', methods=['GET'])
