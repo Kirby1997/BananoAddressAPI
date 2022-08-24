@@ -32,6 +32,8 @@ def home():
 <a href="/api/v1/resources/addresses/all">/api/v1/resources/addresses/all</a>
 <br>
 <a href="/api/v1/resources/addresses?illicit=1">/api/v1/resources/addresses?illicit=1</a>
+<br>
+<a href="https://github.com/Kirby1997/BananoAddressAPI</a>
 '''
 
 
