@@ -40,7 +40,7 @@ def home():
 
 @app.route('/api/v1/resources/addresses/all', methods=['GET'])
 def api_all():
-    conn = sqlite3.connect('addresses.sqlite')
+    conn = sqlite3.connect(os.getcwd() + "/addresses.sqlite")
     conn.row_factory = dict_factory
     cur = conn.cursor()
     all_addresses = cur.execute('SELECT * FROM addresses;').fetchall()
