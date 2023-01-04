@@ -6,12 +6,13 @@ import bananopy.banano as ban
 import timeit
 import math
 import datetime
+import time
 
 
-def get_history(address, noTrans=20, pagesize=3000):
+def get_history(address, noTrans=3000):
 
-    if pagesize > 3000:
-        pagesize = 3000
+
+    pagesize = 10000
 
     accountInfo = ban.account_info(address)
     head = getLastRun(address)
@@ -20,8 +21,9 @@ def get_history(address, noTrans=20, pagesize=3000):
     frontier = accountInfo["frontier"]
     if head == frontier:
         pass
-    blockHeight = accountInfo["block_count"]
+    accountHeight = accountInfo["block_count"]
 
+    #noTrans = get_remaining(accountHeight, head)
     pages = math.ceil(noTrans / pagesize)
     count = 0
     full_history = []
@@ -35,13 +37,24 @@ def get_history(address, noTrans=20, pagesize=3000):
         full_history += history["history"]
         try:
             head = history["next"]
+            writeLastRun(address, head)
         except Exception as e:
             print(e)
+            print("Reached end of transaction history")
             head = frontier
+            writeLastRun(address, head)
+            break
 
-        writeLastRun(address, head)
+
 
     return full_history
+
+
+def get_remaining(accountHeight, head):
+    info = ban.block_info(head,True)
+    headHeight = info["height"]
+    return accountHeight - headHeight
+
 
 
 def dict_factory(cursor, row):
@@ -64,7 +77,8 @@ def readServices():
                       "ban_1swapdwa9wwaxh38htsrupc6zfrcojtqz4kd6jssrat6cec1ggfjnnm6hypz",
                       "ban_1t8hyu6taczfq3gmdqkwcxc6z4pt3sfwg5m7op488hxjmne55r16tebaoztb",
                       "ban_3r7xjnq4ywn1sf387xzpgbytwuaa6hgfurd11mx7qagkx1hiuq73ka63hbxz", #banlotto
-                      "ban_1kwin96znfqopi7be3shxcxn8qeruirob885oaya4ix5pkrnpsou4u5qbeaa" #banslots
+                      "ban_1kwin96znfqopi7be3shxcxn8qeruirob885oaya4ix5pkrnpsou4u5qbeaa", #banslots
+                      "ban_3k76rawffjm79qedoc54nhk3edkq5makoyp73b1t6q6j9yjeq633q1xck9g8"
                       ]
 
         params = []
@@ -89,7 +103,7 @@ def readServices():
 def writeIntermediaries(newintermediaries):
     with sqlite3.connect(os.getcwd() + "/addresses.sqlite") as conn:
         cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS intermediaries (address TEXT, service TEXT)")
+        cur.execute("CREATE TABLE IF NOT EXISTS intermediaries (address TEXT PRIMARY KEY, service TEXT)")
 
         for service, addresses in newintermediaries.items():
             for address in addresses:
@@ -106,11 +120,18 @@ def getLastRun(address):
     with sqlite3.connect(os.getcwd() + "/addresses.sqlite") as conn:
         conn.row_factory = dict_factory
         cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS last_run (address TEXT PRIMARY KEY, date_time TEXT, head TEXT)")
+        conn.commit()
         query = 'SELECT head FROM last_run WHERE address=?'
-        head = cur.execute(query, (address,)).fetchone()
-        if head is not None:
-            return head['head']
-        return None
+        try:
+            head = cur.execute(query, (address,)).fetchone()
+            if head is not None:
+                return head['head']
+            return None
+        except Exception as e:
+            print("AAAA")
+            print(e)
+            return None
 
 def writeLastRun(address, head):
     with sqlite3.connect(os.getcwd() + "/addresses.sqlite") as conn:
@@ -118,7 +139,13 @@ def writeLastRun(address, head):
         cur.execute("CREATE TABLE IF NOT EXISTS last_run (address TEXT PRIMARY KEY, date_time TEXT, head TEXT)")
 
         date_time = str(datetime.datetime.now())
-        cur.execute("UPDATE last_run SET date_time=?, head=? WHERE address=?", (date_time, head, address))
+        try:
+            cur.execute("INSERT INTO last_run (date_time, head, address) VALUES (?, ?, ?)", (date_time, head, address))
+
+        except Exception as e:
+            print("Service already included. Updating run time")
+            print(e)
+            cur.execute("UPDATE last_run SET date_time=?, head=? WHERE address=?", (date_time, head, address))
 
         conn.commit()
 
@@ -131,12 +158,13 @@ def main():
         print(record["address"])
         mainaddress = record["address"]
         intermediaries = []
-        history = get_history(record["address"], noTrans=20)
+        history = get_history(record["address"], noTrans=70000)
         for transaction in history:
-            if transaction["account"] not in intermediaries:
+            if transaction["type"] == "receive" and transaction["account"] not in intermediaries:
                 intermediaries.append(transaction["account"])
         newintermediaries[record["address"]] = intermediaries
-    writeIntermediaries(newintermediaries)
+        writeIntermediaries(newintermediaries)
+
 
 
 
