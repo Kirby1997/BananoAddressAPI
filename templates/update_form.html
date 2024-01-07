@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Update and Query Records</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body class="bg-dark">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">Banano Address API</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/query-address">Query an Address</a>
+                <a class="nav-link" href="/manage-records">Manage Records (Admin)</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container text-light">
+        <h2>Query Address Records</h2>
+        <form id="queryForm" class="mb-4">
+            <div class="form-group">
+                <label for="queryAddress">Address:</label>
+                <input type="text" id="queryAddress" name="address" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Query</button>
+        </form>
+
+        <div id="queryResponse" class="mb-4 table-responsive text-light"></div>
+
+        <h2>Update Record</h2>
+        <form id="updateForm" class="mb-4" style="display:none;">
+            <input type="hidden" id="updateId" name="id">
+            <div class="form-group">
+                <label for="updateAlias">Alias:</label>
+                <input type="text" id="updateAlias" name="alias" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="updateOwner">Owner:</label>
+                <input type="text" id="updateOwner" name="owner" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="updateType">Type:</label>
+                <input type="text" id="updateType" name="type" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="updatePassword">Password:</label>
+                <input type="password" id="updatePassword" name="password" class="form-control">
+            </div>
+            <button id="submitUpdate" class="btn btn-success">Update</button>
+        </form>
+
+        <div id="updateResponse"></div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Existing code for update form
+
+            // Function to make table cells editable
+            function makeEditable(cell) {
+                cell.attr('contenteditable', 'true');
+                cell.on('blur', function () {
+                    var recordId = $(this).closest('tr').attr('data-id');
+                    var columnName = $(this).attr('data-column');
+                    var newValue = $(this).text();
+                    updateRecord(recordId, columnName, newValue);
+                });
+            }
+
+            // Update record function
+            function updateRecord(id, column, value, password) {
+                var data = { id: id, new_data: {}, password: password };
+                data.new_data[column] = value;
+
+                $.ajax({
+                    url: '/api/v1/resources/addresses/update',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        $('#updateResponse').html('<p class="text-success">Record Updated Successfully</p>');
+                        $('#queryForm').submit();
+                    },
+                    error: function (response) {
+                        // Parse the JSON response to extract the error message
+                        var errorMsg = response.responseJSON && response.responseJSON.error ? response.responseJSON.error : "An error occurred";
+                        $('#updateResponse').html('<p class="text-danger">' + errorMsg + '</p>');
+                    }
+                });
+            }
+
+            // Adjusted query form submission
+            $('#queryForm').on('submit', function (e) {
+                e.preventDefault();
+                var address = $('#queryAddress').val();
+
+                $.ajax({
+                    url: '/api/v1/resources/addresses', // Update with your query API route
+                    type: 'GET',
+                    data: { address: address },
+                    success: function (response) {
+                        if (response.length === 0) {
+                            // Display 'No results found' message
+                            $('#queryResponse').html('<p class="text-center">No results found.</p>');
+                        } else {
+                            // Existing code to display the table
+                            var html = '<table class="table table-bordered table-striped text-light"><thead><tr><th>Address</th><th>Alias</th><th>Owner</th><th>Type</th><th>Actions</th></tr></thead><tbody>';
+                            $.each(response, function (index, record) {
+                                html += '<tr data-id="' + record.address + '">';
+                                html += '<td><input type="text" class="form-control" data-column="address" value="' + record.address + '"></td>';
+                                html += '<td><input type="text" class="form-control" data-column="alias" value="' + record.alias + '"></td>';
+                                html += '<td><input type="text" class="form-control" data-column="owner" value="' + record.owner + '"></td>';
+                                html += '<td><input type="text" class="form-control" data-column="type" value="' + record.type + '"></td>';
+                                html += '<td><button class="btn btn-primary updateButton" data-id="' + record.address + '">Update</button></td>';
+                                html += '</tr>';
+                            });
+                            html += '</tbody></table>';
+                            $('#queryResponse').html(html);
+                        }
+                    },
+                    error: function (response) {
+                        $('#response').html('<p>Error: ' + response.responseText + '</p>');
+                    }
+                });
+            });
+
+            // Event listener for update button
+            $(document).on('click', '.updateButton', function () {
+                var password = prompt("Please enter the password to update:");
+                if (password) {
+                    var row = $(this).closest('tr');
+                    var id = row.attr('data-id');
+                    var alias = row.find('input[data-column="alias"]').val();
+                    var owner = row.find('input[data-column="owner"]').val();
+                    var type = row.find('input[data-column="type"]').val();
+
+                    updateRecord(id, 'alias', alias, password);
+                    updateRecord(id, 'owner', owner, password);
+                    updateRecord(id, 'type', type, password);
+                } else {
+                    alert("Password is required to update records.");
+                }
+            });
+        });
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

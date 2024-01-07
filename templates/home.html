@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Banano Address API</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body class="bg-dark">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">Banano Address API</a>
+            <div class="navbar-nav">
+                <a class="nav-link active" href="/">Home</a>
+                <a class="nav-link" href="/query-address">Query an Address</a>
+                <a class="nav-link" href="/manage-records">Manage Records (Admin)</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container text-light">
+        <h1>Welcome to the Banano Address API</h1>
+        <p>This API allows you to query Banano address records. Admins can also update and manage records.</p>
+
+        <!-- List of API endpoints -->
+        <div class="list-group my-4">
+            <a href="/api/v1/resources/addresses?address=ban_31dhbgirwzd3ce7naor6o94woefws9hpxu4q8uxm1bz98w89zqpfks5rk3ad"
+                class="list-group-item list-group-item-action">Query by Address</a>
+            <a href="/api/v1/resources/addresses?type=Distribution" class="list-group-item list-group-item-action">Query
+                by Type: Distribution</a>
+            <a href="/api/v1/resources/addresses?type=Exchange" class="list-group-item list-group-item-action">Query by
+                Type: Exchange</a>
+            <a href="/api/v1/resources/addresses?type=Gambling" class="list-group-item list-group-item-action">Query by
+                Type: Gambling</a>
+            <a href="/api/v1/resources/addresses/all" class="list-group-item list-group-item-action">Query All
+                Addresses</a>
+            <a href="/api/v1/resources/addresses?illicit=1" class="list-group-item list-group-item-action">Query Illicit
+                Addresses</a>
+            <a href="/api/v1/resources/intermediaries/all" class="list-group-item list-group-item-action">View All
+                Intermediaries</a>
+            <a href="/api/v1/resources/intermediaries?address=ban_113sf8z98qqihjis3m95gkb35z7ckfakbrtrmbtawf37hc6ixx7rtz53bq8o"
+                class="list-group-item list-group-item-action">Query Intermediaries by Address</a>
+            <a href="/api/v1/resources/intermediaries/status"
+                class="list-group-item list-group-item-action">Intermediaries Status</a>
+        </div>
+
+        <p>Check out the source code on <a href="https://github.com/Kirby1997/BananoAddressAPI"
+                class="text-primary">GitHub</a>.</p>
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
